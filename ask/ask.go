@@ -164,6 +164,19 @@ func StorageBackend() (*S3StorageBackend, error) {
 
 }
 
+func WithLogging() bool {
+	reader := bufio.NewReader(os.Stdin)
+
+	fmt.Print("Generate logging config files as well? (yes no) [no]:")
+	yesno := ReadInput(reader)
+
+	if yesno == "yes" {
+		return true
+	}
+
+	return false
+}
+
 func comparePasswords(password1, password2 []byte) bool {
 	// Use subtle.ConstantTimeCompare for secure comparison
 	return subtle.ConstantTimeCompare(password1, password2) == 1
