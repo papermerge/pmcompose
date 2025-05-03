@@ -12,10 +12,10 @@ must be in `/usr/local/bin/pmcompose_templates`.
 
 ## Usage
 
-Just invoke the binary
+To start it in interactive mode use `-i` flag:
 
 ```
-$ pmcompose
+$ pmcompose -i
 ```
 
 You will be asked, in interactive session, about different parameters.
