@@ -6,6 +6,7 @@ services:
       PAPERMERGE__AUTH__USERNAME: {{.UserLoginCredentials.Username }}
       PAPERMERGE__AUTH__PASSWORD: {{.UserLoginCredentials.Password }}
       PAPERMERGE__DATABASE__URL: postgresql://coco:jumbo@db:5432/pmgdb
+      PAPERMERGE__REDIS__URL: redis://redis:6379/0
       PAPERMERGE__MAIN__MEDIA_ROOT: /var/media/pmg
     ports:
      - "{{ .WebAppPort }}:80"
