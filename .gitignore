@@ -1,0 +1,7 @@
+pmcompose
+docker-compose.yaml
+docker-compose.yml
+vendor/
+dist/
+.vscode/
+*.tar.gz

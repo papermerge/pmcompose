@@ -1,0 +1,68 @@
+services:
+  webapp:
+    image: papermerge/papermerge:{{ .AppVersion }}
+    environment:
+      PAPERMERGE__SECURITY__SECRET_KEY: "{{ .SecretKey }}"
+      PAPERMERGE__AUTH__USERNAME: {{.UserLoginCredentials.Username }}
+      PAPERMERGE__AUTH__PASSWORD: {{.UserLoginCredentials.Password }}
+      PAPERMERGE__DATABASE__URL: postgresql://coco:jumbo@db:5432/pmgdb
+      PAPERMERGE__MAIN__MEDIA_ROOT: /var/media/pmg
+    ports:
+     - "{{ .WebAppPort }}:80"
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - media_root:/var/media/pmg
+  path_template_worker:
+    image: papermerge/path-tmpl-worker:0.4
+    command: worker
+    environment:
+      PAPERMERGE__DATABASE__URL: postgresql://coco:jumbo@db:5432/pmgdb
+      PAPERMERGE__REDIS__URL: redis://redis:6379/0
+      PATH_TMPL_WORKER_ARGS: "-Q path_tmpl -c 2"
+    depends_on:
+      - db
+      - redis
+{{- if ne .S3StorageBackend.S3BucketName ""  }}
+  s3worker:
+    image: papermerge/s3worker:0.4.3
+    command: worker
+    environment:
+      PAPERMERGE__DATABASE__URL: postgresql://coco:jumbo@db:5432/pmgdb
+      PAPERMERGE__REDIS__URL: redis://redis:6379/0
+      PAPERMERGE__MAIN__MEDIA_ROOT: /var/media/pmg
+      PAPERMERGE__S3__BUCKET_NAME: {{ .S3StorageBackend.S3BucketName }}
+      S3_WORKER_ARGS: "-Q s3 -c 2"
+      AWS_REGION_NAME: {{ .S3StorageBackend.AWSRegionName }}
+      AWS_ACCESS_KEY_ID: {{ .S3StorageBackend.AWSAccessKeyID }}
+      AWS_SECRET_ACCESS_KEY: {{ .S3StorageBackend.AWSSecretAccessKey }}
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - media_root:/var/media/pmg
+{{- end }}
+  db:
+    image: postgres:16.1
+    volumes:
+      - pgdata:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_PASSWORD: jumbo
+      POSTGRES_DB: pmgdb
+      POSTGRES_USER: coco
+    healthcheck:
+      test: pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+  redis:
+    image: bitnami/redis:7.2
+    ports:
+      - "6379:6379"
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
+volumes:
+  pgdata:
+  media_root:
