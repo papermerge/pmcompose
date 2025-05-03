@@ -72,7 +72,15 @@ func main() {
 	}
 	cfg.SecretKey = secretKey
 
-	tmpl, err := template.ParseFiles("pmcompose_templates/docker-compose.yaml.tmpl")
+	dir, err := utils.GetExecutableDir()
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+		return
+	}
+
+	templatePath := fmt.Sprintf("%s/pmcompose_templates/docker-compose.yaml.tmpl", dir)
+
+	tmpl, err := template.ParseFiles(templatePath)
 	if err != nil {
 		fmt.Println("Error loading template:", err)
 		return
