@@ -6,6 +6,7 @@ import (
 	"text/template"
 
 	"github.com/papermerge/pmcompose/ask"
+	"github.com/papermerge/pmcompose/logs"
 	"github.com/papermerge/pmcompose/utils"
 )
 
@@ -100,4 +101,17 @@ func main() {
 	}
 
 	fmt.Println("✅ docker-compose.yml generated successfully.")
+
+	err = os.WriteFile("webapp_logging.yaml", []byte(logs.WEBAPP_LOGGING), 0644)
+	if err != nil {
+		fmt.Println("Error writing webapp_logging.yaml file")
+	}
+
+	if cfg.S3StorageBackend.S3BucketName != "" {
+		err = os.WriteFile("s3worker_logging.yaml", []byte(logs.S3WORKER_LOGGING), 0644)
+		if err != nil {
+			fmt.Println("Error writing s3worker_logging.yaml file")
+		}
+	}
+
 }

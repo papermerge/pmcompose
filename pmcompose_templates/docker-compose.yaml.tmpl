@@ -8,6 +8,7 @@ services:
       PAPERMERGE__DATABASE__URL: postgresql://coco:jumbo@db:5432/pmgdb
       PAPERMERGE__REDIS__URL: redis://redis:6379/0
       PAPERMERGE__MAIN__MEDIA_ROOT: /var/media/pmg
+      PAPERMERGE__MAIN__LOGGING_CFG: /etc/papermerge/logging.yaml
     ports:
      - "{{ .WebAppPort }}:80"
     depends_on:
@@ -15,6 +16,7 @@ services:
       - redis
     volumes:
       - media_root:/var/media/pmg
+      - ${PWD}/webapp_logging.yaml:/etc/papermerge/logging.yaml
   path_template_worker:
     image: papermerge/path-tmpl-worker:0.4
     command: worker
@@ -34,6 +36,7 @@ services:
       PAPERMERGE__REDIS__URL: redis://redis:6379/0
       PAPERMERGE__MAIN__MEDIA_ROOT: /var/media/pmg
       PAPERMERGE__S3__BUCKET_NAME: {{ .S3StorageBackend.S3BucketName }}
+      PAPERMERGE__MAIN__LOGGING_CFG: /etc/papermerge/logging.yaml
       S3_WORKER_ARGS: "-Q s3 -c 2"
       AWS_REGION_NAME: {{ .S3StorageBackend.AWSRegionName }}
       AWS_ACCESS_KEY_ID: {{ .S3StorageBackend.AWSAccessKeyID }}
@@ -43,6 +46,7 @@ services:
       - redis
     volumes:
       - media_root:/var/media/pmg
+      - ${PWD}/s3worker_logging.yaml:/etc/papermerge/logging.yaml
 {{- end }}
   db:
     image: postgres:16.1
