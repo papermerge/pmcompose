@@ -10,7 +10,7 @@ For example if `pmcompose` is located in `/usr/local/bin`, then `pmcompose_templ
 must be in `/usr/local/bin/pmcompose_templates`.
 
 
-1. Download latest release
+1. Download [latest release](https://github.com/papermerge/pmcompose/releases)
 2. unzip pmcompose_linux_amd64.zip
 3. then run following commands:
 
