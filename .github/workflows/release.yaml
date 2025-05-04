@@ -1,0 +1,61 @@
+name: Cross-platform Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger on version tags like v1.0.0
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [linux, windows, darwin]
+        goarch: [amd64]
+    name: Build ${{ matrix.goos }}-${{ matrix.goarch }}
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.24.2'
+
+      - name: Build binary from pmcompose.go
+        run: |
+          mkdir -p build/${{ matrix.goos }}_${{ matrix.goarch }}
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o build/${{ matrix.goos }}_${{ matrix.goarch }}/pmcompose${{ matrix.goos == 'windows' && '.exe' || '' }} pmcompose.go
+
+      - name: Copy template files
+        run: |
+          cp -r pmcompose_templates build/${{ matrix.goos }}_${{ matrix.goarch }}/
+
+      - name: Create ZIP archive
+        run: |
+          cd build/${{ matrix.goos }}_${{ matrix.goarch }}
+          zip -r ../../pmcompose_${{ matrix.goos }}_${{ matrix.goarch }}.zip .
+          cd ../..
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pmcompose_${{ matrix.goos }}_${{ matrix.goarch }}
+          path: pmcompose_${{ matrix.goos }}_${{ matrix.goarch }}.zip
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
